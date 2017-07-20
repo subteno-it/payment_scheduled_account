@@ -20,18 +20,9 @@ class PaymentTransaction(models.Model):
                 fields.Date.context_today(self)
             )[0]
             for payment_date, amount in sorted(totlines):
-                self.env['account.payment'].create({
-                    'payment_date': payment_date,
-                    'payment_type': 'inbound',
-                    'amount': amount,
-                    'currency_id': self.currency_id.id,
-                    'journal_id': self.acquirer_id.journal_id.id,
-                    'partner_type': 'customer',
-                    'partner_id': self.partner_id.id,
-                    'payment_reference': self.reference,
-                    'payment_method_id': self.env.ref('account.account_payment_method_manual_in').id,
-                    'transaction_id': self.id,
-                }).post()
+                payment_data = self._prepare_payment_data()
+                payment_data.update(payment_date=payment_date, amount=amount)
+                self.env['account.payment'].create(payment_data).post()
         else:
             super(PaymentTransaction, self).create_account_payment()
         return True
