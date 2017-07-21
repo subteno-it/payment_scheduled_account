@@ -41,7 +41,11 @@ class PaymentTransaction(models.Model):
             )[0]
             for payment_date, amount in sorted(totlines):
                 payment_data = self._prepare_payment_data()
-                payment_data.update(payment_date=payment_date, amount=amount)
+                payment_data.update(
+                    payment_date=payment_date,
+                    amount=amount,
+                    payment_difference_handling='open',
+                )
                 self.env['account.payment'].create(payment_data).post()
         else:
             super(PaymentTransaction, self).create_account_payment()
